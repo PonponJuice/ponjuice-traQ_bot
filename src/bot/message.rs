@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use http::StatusCode;
 use svg::node::element::{path::Data, Path};
 use traq::{apis::{configuration, file_api::PostFileError, Error, ResponseContent}, models};
@@ -46,9 +44,10 @@ pub async fn direct_message_created(app: App, payload: DirectMessageCreatedPaylo
         payload.message.channel_id
     );
 
-    let file = make_svg_file();
+    let file_name = "image.svg";
+    make_svg_file(file_name);
 
-    let resp = post_file(&app.client_config, file, &payload.message.channel_id).await;
+    let resp = post_file(&app.client_config, file_name, &payload.message.channel_id).await;
 
     let resp = match resp {
         Ok(resp) => resp,
@@ -70,7 +69,7 @@ pub async fn direct_message_created(app: App, payload: DirectMessageCreatedPaylo
     StatusCode::NO_CONTENT
 }
 
-fn make_svg_file() -> PathBuf {
+fn make_svg_file(file_name: &str) {
     let data = Data::new()
         .move_to((10, 10))
         .line_by((0, 50))
@@ -88,15 +87,13 @@ fn make_svg_file() -> PathBuf {
         .set("viewBox", (0, 0, 70, 70))
         .add(path);
 
-    svg::save("./image.svg", &document).unwrap();
-
-    PathBuf::from("./image.svg")
+    svg::save(file_name, &document).unwrap();
 }
 
 /// 指定したチャンネルにファイルをアップロードします。 アーカイブされているチャンネルにはアップロード出来ません。
 pub async fn post_file(
     configuration: &configuration::Configuration,
-    file: std::path::PathBuf,
+    file_name: &str,
     channel_id: &str,
 ) -> Result<models::FileInfo, Error<PostFileError>> {
     let local_var_configuration = configuration;
@@ -119,8 +116,8 @@ pub async fn post_file(
     };
     let mut local_var_form = reqwest::multipart::Form::new();
     // TODO: support file upload for 'file' parameter
-    let data = std::fs::read(file)?;
-    let filedata = reqwest::multipart::Part::bytes(data).file_name("image.svg");
+    let data = std::fs::read(file_name)?;
+    let filedata = reqwest::multipart::Part::bytes(data).file_name(file_name.to_string());
 
     local_var_form = local_var_form.text("channelId", channel_id.to_string());
     local_var_form = local_var_form.part("file", filedata);
