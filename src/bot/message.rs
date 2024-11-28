@@ -37,7 +37,8 @@ pub async fn direct_message_created(app: App, payload: DirectMessageCreatedPaylo
 
     tracing::info!(
         "{}さんがメッセージを投稿しました。\n内容: {}",
-        user.display_name, payload.message.text
+        user.display_name,
+        payload.message.text
     );
 
     let request = traq::models::PostMessageRequest {
