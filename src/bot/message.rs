@@ -46,9 +46,9 @@ pub async fn direct_message_created(app: App, payload: DirectMessageCreatedPaylo
     );
 
     let file_name = "image.svg";
-    make_svg_file(file_name);
+    let file = make_svg_file(file_name);
 
-    let resp = post_file(&app.client_config, file_name, &payload.message.channel_id).await;
+    let resp = post_file(&app.client_config, file, &payload.message.channel_id).await;
 
     let resp = match resp {
         Ok(resp) => resp,

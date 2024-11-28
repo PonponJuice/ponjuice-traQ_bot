@@ -4,7 +4,7 @@ use traq::{
     models,
 };
 
-pub fn make_svg_file(file_name: &str) {
+pub fn make_svg_file(file_name: &str) -> std::path::PathBuf {
     let data = Data::new()
         .move_to((10, 10))
         .line_by((0, 50))
@@ -23,12 +23,14 @@ pub fn make_svg_file(file_name: &str) {
         .add(path);
 
     svg::save(file_name, &document).unwrap();
+
+    std::path::PathBuf::from(file_name)
 }
 
 /// 指定したチャンネルにファイルをアップロードします。 アーカイブされているチャンネルにはアップロード出来ません。
 pub async fn post_file(
     configuration: &configuration::Configuration,
-    file_name: &str,
+    file: std::path::PathBuf,
     channel_id: &str,
 ) -> Result<models::FileInfo, Error<PostFileError>> {
     let local_var_configuration = configuration;
@@ -50,9 +52,13 @@ pub async fn post_file(
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
     let mut local_var_form = reqwest::multipart::Form::new();
-    // TODO: support file upload for 'file' parameter
-    let data = std::fs::read(file_name)?;
-    let filedata = reqwest::multipart::Part::bytes(data).file_name(file_name.to_string());
+
+    let filename = file
+        .file_name()
+        .map(|name| name.to_os_string())
+        .expect("No file name found in the path");
+    let data = std::fs::read(file)?;
+    let filedata = reqwest::multipart::Part::bytes(data).file_name(filename.into_string().unwrap());
 
     local_var_form = local_var_form.text("channelId", channel_id.to_string());
     local_var_form = local_var_form.part("file", filedata);
