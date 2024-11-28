@@ -57,7 +57,12 @@ async fn handler(State(app): State<App>, headers: HeaderMap, body: Bytes) -> Sta
         Ok(Event::DirectMessageCreated(payload)) => {
             use traq::apis::message_api::post_direct_message;
             let user = payload.message.user;
-            println!("{}さんにDMで返答", user.display_name);
+            
+            print!(
+                "{}さんがメッセージを投稿しました。\n内容: {}\n",
+                user.display_name, payload.message.text
+            );
+
             let request = traq::models::PostMessageRequest {
                 content: ":oisu-:".to_string(),
                 embed: None,
