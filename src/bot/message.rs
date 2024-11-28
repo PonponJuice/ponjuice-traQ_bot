@@ -39,10 +39,9 @@ pub async fn direct_message_created(app: App, payload: DirectMessageCreatedPaylo
     let user = payload.message.user;
 
     tracing::info!(
-        "{}さんがメッセージを投稿しました。\n内容: {}\n{}",
+        "{}さんがメッセージを投稿しました。\n内容: {}",
         user.display_name,
-        payload.message.text,
-        payload.message.channel_id
+        payload.message.text
     );
 
     let file_name = "image.svg";
