@@ -1303,9 +1303,9 @@ dependencies = [
 
 [[package]]
 name = "traq-bot-http"
-version = "0.8.3"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3ee0823620b54a3b8650e765ca4fb181f7b79154f4f5783d198b8af2c9b2a84"
+checksum = "7f3b1095beb951940c783171bbd038c87f9d20095131c18f4828259a75ea2744"
 dependencies = [
  "paste",
  "serde",

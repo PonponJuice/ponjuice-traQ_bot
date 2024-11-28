@@ -34,10 +34,24 @@ async fn main() {
 async fn handler(State(app): State<App>, headers: HeaderMap, body: Bytes) -> StatusCode {
     match app.request_parser.parse(headers.iter(), &body) {
         Ok(Event::MessageCreated(payload)) => {
+            use traq::apis::message_api::post_message;
             print!(
                 "{}さんがメッセージを投稿しました。\n内容: {}\n",
                 payload.message.user.display_name, payload.message.text
             );
+
+            let request = traq::models::PostMessageRequest {
+                content: format!(":oisu-: {}", payload.message.user.display_name),
+                embed: None,
+            };
+
+            let res = post_message(&app.client_config, &payload.message.channel_id, Some(request)).await;
+
+            if let Err(e) = res {
+                eprintln!("{e}");
+                return StatusCode::INTERNAL_SERVER_ERROR;
+            }
+
             StatusCode::NO_CONTENT
         }
         Ok(Event::DirectMessageCreated(payload)) => {
