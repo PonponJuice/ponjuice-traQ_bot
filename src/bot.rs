@@ -4,6 +4,7 @@ use traq_bot_http::Event;
 
 use crate::App;
 mod message;
+mod util;
 
 pub async fn bot_handle(State(app): State<App>, headers: HeaderMap, body: Bytes) -> StatusCode {
     let event = match app.request_parser.parse(headers.iter(), &body) {
