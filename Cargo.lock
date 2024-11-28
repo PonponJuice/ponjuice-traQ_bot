@@ -838,6 +838,8 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "http",
+ "reqwest",
+ "serde_json",
  "svg",
  "tokio",
  "tracing",
