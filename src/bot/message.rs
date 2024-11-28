@@ -1,4 +1,8 @@
+use std::path::PathBuf;
+
 use http::StatusCode;
+use svg::node::element::{path::Data, Path};
+use traq::apis::file_api::post_file;
 use traq_bot_http::payloads::{DirectMessageCreatedPayload, MessageCreatedPayload};
 
 use crate::App;
@@ -41,8 +45,20 @@ pub async fn direct_message_created(app: App, payload: DirectMessageCreatedPaylo
         payload.message.text
     );
 
+    let file = make_svg_file();
+
+    let resp = post_file(&app.client_config, file, &payload.message.channel_id).await;
+
+    let resp = match resp {
+        Ok(resp) => resp,
+        Err(e) => {
+            tracing::error!("{e}");
+            return StatusCode::INTERNAL_SERVER_ERROR;
+        }
+    };
+
     let request = traq::models::PostMessageRequest {
-        content: ":oisu-:".to_string(),
+        content: format!("これはテストです\n\nhttps://q.trap.jp/files/{}", resp.id),
         embed: None,
     };
     let res = post_direct_message(&app.client_config, &user.id, Some(request)).await;
@@ -51,4 +67,27 @@ pub async fn direct_message_created(app: App, payload: DirectMessageCreatedPaylo
         return StatusCode::INTERNAL_SERVER_ERROR;
     }
     StatusCode::NO_CONTENT
+}
+
+fn make_svg_file() -> PathBuf {
+    let data = Data::new()
+        .move_to((10, 10))
+        .line_by((0, 50))
+        .line_by((50, 0))
+        .line_by((0, -50))
+        .close();
+
+    let path = Path::new()
+        .set("fill", "none")
+        .set("stroke", "black")
+        .set("stroke-width", 2)
+        .set("d", data);
+
+    let document = svg::Document::new()
+        .set("viewBox", (0, 0, 70, 70))
+        .add(path);
+
+    svg::save("./image.svg", &document).unwrap();
+
+    PathBuf::from("./image.svg")
 }
