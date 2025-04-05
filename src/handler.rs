@@ -10,9 +10,17 @@ async fn test_handler() -> &'static str {
 
 async fn get_atcoder() -> Result<String, String> {
     let url = "https://atcoder.jp/users/ponjuice/history/json";
-    let response = reqwest::get(url).await.map_err(|e| e.to_string())?;
-    let body = response.json().await.map_err(|e| e.to_string())?;
-    Ok(body)
+
+    let response = reqwest::get(url).await.map_err(|e| {tracing::info!("{:?}" ,e); e.to_string()})?;
+
+    tracing::info!("Response Status: {:?}", response.status());
+    tracing::info!("Response Content-Length: {:?}", response.content_length());
+    tracing::info!("Response Headers: {:?}", response.headers());
+    tracing::info!("Response URL: {:?}", response.url());
+    tracing::info!("Response Version: {:?}", response.version());
+    tracing::info!("Response Text: {:?}", response.text().await.map_err(|e| {tracing::info!("{:?}" ,e); e.to_string()})?);
+
+    Ok("ok".to_string())
 }
 
 pub fn make_router(app: App) -> Router {
